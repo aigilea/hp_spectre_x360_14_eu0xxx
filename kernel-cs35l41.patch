@@ -1,0 +1,18 @@
+--- a/sound/pci/hda/cs35l41_hda_property.c	2024-03-04 00:02:52.000000000 +0300
++++ b/sound/pci/hda/cs35l41_hda_property.c	2024-03-07 20:11:25.321400460 +0300
+@@ -64,6 +64,7 @@
+ 	{ "103C8BE5", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4100, 24 },
+ 	{ "103C8BE6", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4100, 24 },
+ 	{ "103C8B3A", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4100, 24 },
++	{ "103C8C15", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4100, 24 },
+ 	{ "104312AF", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 1, 2, 0, 1000, 4500, 24 },
+ 	{ "10431433", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4500, 24 },
+ 	{ "10431463", 2, INTERNAL, { CS35L41_LEFT, CS35L41_RIGHT, 0, 0 }, 0, 1, -1, 1000, 4500, 24 },
+@@ -402,6 +403,7 @@
+ 	{ "CSC3551", "103C8BE5", generic_dsd_config },
+ 	{ "CSC3551", "103C8BE6", generic_dsd_config },
+ 	{ "CSC3551", "103C8B3A", generic_dsd_config },
++	{ "CSC3551", "103C8C15", generic_dsd_config },
+ 	{ "CSC3551", "104312AF", generic_dsd_config },
+ 	{ "CSC3551", "10431433", generic_dsd_config },
+ 	{ "CSC3551", "10431463", generic_dsd_config },
