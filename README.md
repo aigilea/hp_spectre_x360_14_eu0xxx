@@ -10,7 +10,7 @@ Linux won't boot without ACPI overlay and Secure Boot thus won't be usable until
 
 Synaptics releases Linux-compatible firmware only if requested by vendor, fingerprint reader won't work without HP will (none of previous generations got one working).
 
-Camera is IPU6+MIPI, both main (ov08x40) and IR (og0va1b) sensors have Linux drivers, both drivers are not ACPI-compatible and need work, both are not currently supported by Intel VPU6 stack so it's unlikely either of this sensonrs will work with vanilla kernels for at least another year.
+Camera is IPU6+MIPI, both main (ov08x40) and IR (og0va1b) sensors have Linux drivers, both drivers are not ACPI-compatible and need work, both are not currently supported by Intel VPU6 stack so it's unlikely either of this sensors will work with vanilla kernels for at least another year.
 
 Otherwise it's a solid laptop, but think twice.
 
@@ -23,7 +23,7 @@ How to install?
 5. Add the same kernel parameter when rebooting to the installed system.
 6. Install IASL (usually package is named acpi-tools or acpica-tools or acpica).
 7. Download [SSDT patch][1] and compile it with `iasl -tc hp-spectre-x360-14-eu0xxx-f5a.dsl`.
-8. There's a number of ways to apply the resulting AML file. The easiest one is to put it to the `/boot` and add `acpi /boot/filename.aml` line to the grub config, you can do it manually via `e` for the first time and then switch to using some [helper scripts][2]. There're kernel [means][3] and [helper scripts][4] of loading additional tables as well.
+8. There's a number of ways to apply the resulting AML file. The easiest one is to put it to the `/boot` and add `acpi /boot/filename.aml` line to the grub config, you can do it manually via `e` for the first time and then switch to using some [helper scripts][2]. There're kernel [means][3], [manuals][9] and [helper scripts][4] of loading additional tables as well.
 9. With SSDT patch applied you no longer need `modprobe.blacklist` workaround so previously disabled devices like trackpad and touchscreen work at this point.
 10. Update your kernel to at least 6.7.
 
@@ -53,4 +53,4 @@ How to fix the sound?
 [6]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/kernel-realtek.patch
 [7]: https://github.com/CirrusLogic/linux-firmware/tree/main/cirrus
 [8]: https://github.com/thesofproject/sof-bin/releases
-
+[9]: https://gist.github.com/lamperez/d5b385bc0c0c04928211e297a69f32d7
