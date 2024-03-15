@@ -10,7 +10,7 @@ Linux won't boot without ACPI overlay and Secure Boot thus won't be usable until
 
 Synaptics releases Linux-compatible firmware only if requested by vendor, fingerprint reader won't work without HP will (none of previous generations got one working).
 
-Camera is IPU6+MIPI, both main (ov08x40) and IR (og0va1b) sensors have Linux drivers, both drivers are not ACPI-compatible and need work, both are not currently supported by Intel VPU6 stack so it's unlikely either of this sensors will work with vanilla kernels for at least another year.
+Camera is IPU6+MIPI, both main (ov08x40) and IR (og0va1b) sensors have Linux drivers, both drivers are not ACPI-compatible and need work, both are not currently supported by Intel VPU6 stack (although it looks like support for ov08x40 is coming) so it's unlikely either of this sensors will work with vanilla kernels for at least another year.
 
 Otherwise it's a solid laptop, but think twice.
 
