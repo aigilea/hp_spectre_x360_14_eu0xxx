@@ -1,6 +1,6 @@
---- a/sound/pci/hda/patch_realtek.c	2024-03-04 00:02:52.000000000 +0300
-+++ b/sound/pci/hda/patch_realtek.c	2024-03-07 17:32:48.434464018 +0300
-@@ -7204,6 +7204,32 @@
+--- a/sound/pci/hda/patch_realtek.c	2024-03-10 23:38:09.000000000 +0300
++++ b/sound/pci/hda/patch_realtek.c	2024-03-17 03:36:42.305164663 +0300
+@@ -7204,6 +7204,38 @@
  	}
  }
  
@@ -8,20 +8,26 @@
 +					  const struct hda_fixup *fix, int action)
 +{
 +	/*
-+	 * Prefer both bass (0x14) and treble speakers (0x17) connected to DAC 0x02.
-+	 * Headphones (0x21) are connected to DAC 0x03.
++	 * The Pin Complex 0x14 for the treble speakers is wrongly reported as
++	 * unconnected.
++	 * The Pin Complex 0x17 for the bass speakers has the lowest association
++	 * and sequence values so shift it up a bit to squeeze 0x14 in.
 +	 */
-+	static const hda_nid_t preferred_pairs[] = {
-+		0x14, 0x02,
-+		0x17, 0x02,
-+		0x21, 0x03,
-+		0
++	static const struct hda_pintbl pincfgs[] = {
++		{ 0x14, 0x90170110 }, // top/treble
++		{ 0x17, 0x90170111 }, // bottom/bass
++		{ }
 +	};
-+	struct alc_spec *spec = codec->spec;
++
++	/*
++	 * Force DAC 0x02 for bass speakers 0x17.
++	 */
++	static const hda_nid_t conn[] = { 0x02 };
 +
 +	switch (action) {
 +	case HDA_FIXUP_ACT_PRE_PROBE:
-+		spec->gen.preferred_dacs = preferred_pairs;
++		snd_hda_apply_pincfgs(codec, pincfgs);
++		snd_hda_override_conn_list(codec, 0x17, ARRAY_SIZE(conn), conn);
 +		break;
 +	}
 +
@@ -33,7 +39,7 @@
  
  enum {
  	ALC269_FIXUP_GPIO2,
-@@ -7478,6 +7504,7 @@
+@@ -7478,6 +7510,7 @@
  	ALC2XX_FIXUP_HEADSET_MIC,
  	ALC289_FIXUP_DELL_CS35L41_SPI_2,
  	ALC294_FIXUP_CS35L41_I2C_2,
@@ -41,7 +47,7 @@
  };
  
  /* A special fixup for Lenovo C940 and Yoga Duet 7;
-@@ -9655,6 +9682,10 @@
+@@ -9655,6 +9688,10 @@
  		.type = HDA_FIXUP_FUNC,
  		.v.func = cs35l41_fixup_i2c_two,
  	},
@@ -52,7 +58,7 @@
  };
  
  static const struct snd_pci_quirk alc269_fixup_tbl[] = {
-@@ -9989,6 +10020,7 @@
+@@ -9989,6 +10026,7 @@
  	SND_PCI_QUIRK(0x103c, 0x8b96, "HP", ALC236_FIXUP_HP_MUTE_LED_MICMUTE_VREF),
  	SND_PCI_QUIRK(0x103c, 0x8b97, "HP", ALC236_FIXUP_HP_MUTE_LED_MICMUTE_VREF),
  	SND_PCI_QUIRK(0x103c, 0x8bf0, "HP", ALC236_FIXUP_HP_GPIO_LED),
