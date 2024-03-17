@@ -1,6 +1,6 @@
 --- a/sound/pci/hda/patch_realtek.c	2024-03-10 23:38:09.000000000 +0300
 +++ b/sound/pci/hda/patch_realtek.c	2024-03-17 03:36:42.305164663 +0300
-@@ -7204,6 +7204,38 @@
+@@ -7204,6 +7204,38 @@ static void alc_fixup_headset_mic(struct
  	}
  }
  
@@ -20,7 +20,7 @@
 +	};
 +
 +	/*
-+	 * Force DAC 0x02 for bass speakers 0x17.
++	 * Force DAC 0x02 for the bass speakers 0x17.
 +	 */
 +	static const hda_nid_t conn[] = { 0x02 };
 +
@@ -39,7 +39,7 @@
  
  enum {
  	ALC269_FIXUP_GPIO2,
-@@ -7478,6 +7510,7 @@
+@@ -7478,6 +7510,7 @@ enum {
  	ALC2XX_FIXUP_HEADSET_MIC,
  	ALC289_FIXUP_DELL_CS35L41_SPI_2,
  	ALC294_FIXUP_CS35L41_I2C_2,
@@ -47,7 +47,7 @@
  };
  
  /* A special fixup for Lenovo C940 and Yoga Duet 7;
-@@ -9655,6 +9688,10 @@
+@@ -9655,6 +9688,10 @@ static const struct hda_fixup alc269_fix
  		.type = HDA_FIXUP_FUNC,
  		.v.func = cs35l41_fixup_i2c_two,
  	},
@@ -58,7 +58,7 @@
  };
  
  static const struct snd_pci_quirk alc269_fixup_tbl[] = {
-@@ -9989,6 +10026,7 @@
+@@ -9989,6 +10026,7 @@ static const struct snd_pci_quirk alc269
  	SND_PCI_QUIRK(0x103c, 0x8b96, "HP", ALC236_FIXUP_HP_MUTE_LED_MICMUTE_VREF),
  	SND_PCI_QUIRK(0x103c, 0x8b97, "HP", ALC236_FIXUP_HP_MUTE_LED_MICMUTE_VREF),
  	SND_PCI_QUIRK(0x103c, 0x8bf0, "HP", ALC236_FIXUP_HP_GPIO_LED),
