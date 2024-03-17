@@ -23,13 +23,13 @@ How to install?
 5. Add the same kernel parameter when rebooting to the installed system.
 6. Install IASL (usually package is named acpi-tools or acpica-tools or acpica).
 7. Download [SSDT patch][1] and compile it with `iasl -tc hp-spectre-x360-14-eu0xxx-f5a.dsl`.
-8. There's a number of ways to apply the resulting AML file. The easiest one is to put it to the `/boot` and add `acpi /boot/filename.aml` line to the grub config, you can do it manually via `e` for the first time and then switch to using some [helper scripts][2]. There're kernel [means][3], [manuals][9] and [helper scripts][4] of loading additional tables as well.
-9. With SSDT patch applied you no longer need `modprobe.blacklist` workaround so previously disabled devices like trackpad and touchscreen work at this point.
+8. There's a number of ways to apply the resulting AML file. The easiest one is to put it to the `/boot` and add `acpi /boot/filename.aml` line to the grub config, you can do it manually via `e` for the first time and then switch to using some [helper scripts][2]. There're kernel [means][3], [manuals][9] and [helper scripts][4] of loading additional ACPI tables as well.
+9. With SSDT patch applied you no longer need `modprobe.blacklist` workaround so previously disabled devices like trackpad and touchscreen should work at this point.
 10. Update your kernel to at least 6.7.
 
 How to fix the sound?
 --------
-1. This requires building you own kernel, consult your distribution doucmentation on how to do it.
+1. This requires building you own kernel, consult your distribution documentation on how to do it.
 2. Use at least kernel 6.7.
 3. Use `patch -p1 < filename.patch` is the kernel source directory to apply patches ([first][5], [second][6]) before building the kernel.
 4. If you have `Falling back to default firmware.` messages from `cs35l41-hda`, your linux-firmware is outdated. You may either wait for your distribution to update the package or download the firmware from the [Cirrus repository][7] to /lib/firmware/cirrus manually. You will need following files:

@@ -9,7 +9,7 @@ DefinitionBlock ("", "SSDT", 5, "aigi  ", "x360-eu0", 0x02000000)
     //
     // IC03 integer is declared in the root namespace and is supposed to be used in I2C3._PS3.
     // Issue is caused by _SB.PC00.IC03 device which is declared in one of SSDTs and comes first during name evaluation.
-    // Declaring another IC03 right inside I2C3 solves the issue.
+    // Providing a shorter path to the correct value by declaring it right inside I2C3 solves the issue.
     //
     Scope (_SB.PC00.I2C3)
     {
