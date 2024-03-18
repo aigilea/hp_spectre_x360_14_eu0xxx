@@ -31,8 +31,8 @@ How to fix the sound?
 --------
 1. This requires building you own kernel, consult your distribution documentation on how to do it.
 2. Use at least kernel 6.7.
-3. Use `patch -p1 < filename.patch` is the kernel source directory to apply patches ([first][5], [second][6]) before building the kernel.
-4. If you have `Falling back to default firmware.` messages from `cs35l41-hda`, your linux-firmware is outdated. You may either wait for your distribution to update the package or download the firmware from the [Cirrus repository][7] to /lib/firmware/cirrus manually. You will need following files:
+3. Use `patch -p1 < filename.patch` is the kernel source directory to apply patches ([first][5], [second][6] for 6.8 or older, [just one][10] for 6.9) before building the kernel.
+4. If you have `Falling back to default firmware.` messages from `cs35l41-hda` in dmesg, your linux-firmware is outdated. You may either wait for your distribution to update the package or download the firmware from the [Cirrus repository][7] to /lib/firmware/cirrus manually. You will need following files:
     * cs35l41-dsp1-spk-cali-103c8c15-spkid0-l0.bin
     * cs35l41-dsp1-spk-cali-103c8c15-spkid0-r0.bin
     * cs35l41-dsp1-spk-cali-103c8c15-spkid1-l0.bin
@@ -54,3 +54,4 @@ How to fix the sound?
 [7]: https://github.com/CirrusLogic/linux-firmware/tree/main/cirrus
 [8]: https://github.com/thesofproject/sof-bin/releases
 [9]: https://gist.github.com/lamperez/d5b385bc0c0c04928211e297a69f32d7
+[10]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/kernel-realtek-69.patch
