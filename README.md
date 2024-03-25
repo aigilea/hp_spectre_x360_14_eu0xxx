@@ -30,7 +30,7 @@ How to install?
 How to fix the sound?
 --------
 1. Kernel:
-    * These fixes have been submitted and accepted so you don't have to patch the kernel if you're using 6.9 or later.
+    * These fixes have been submitted and accepted so you don't have to patch the kernel if you're using 6.9 or later (but don't use -rc1 yet, it has troubles sleeping).
     * If you want to use 6.8 or older, you have to apply [these][5] [two][6] patches (`patch -p1 < filename.patch` in the kernel source directory) and rebuild the kernel, consult your distribution documentation on how to do it.
 2. If you have `Falling back to default firmware.` messages from `cs35l41-hda` in dmesg, your linux-firmware is outdated. You may either wait for your distribution to update the package or download the firmware from the [Cirrus repository][7] to /lib/firmware/cirrus manually. You will need following files:
     * cs35l41-dsp1-spk-cali-103c8c15-spkid0-l0.bin
