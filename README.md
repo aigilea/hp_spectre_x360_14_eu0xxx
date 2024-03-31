@@ -30,7 +30,7 @@ How to install?
 How to fix the sound?
 --------
 1. Kernel:
-    * These fixes have been submitted and accepted so you don't have to patch the kernel if you're using 6.9 or later (but don't use -rc1 yet, it has troubles sleeping).
+    * These fixes have been submitted and accepted so you don't have to patch if you're using kernel 6.9 or later (but don't use -rc1 yet, it has troubles sleeping).
     * If you want to use 6.8 or older, you have to apply [these][5] [two][6] patches (`patch -p1 < filename.patch` in the kernel source directory) and rebuild the kernel, consult your distribution documentation on how to do it.
 2. If you have `Falling back to default firmware.` messages from `cs35l41-hda` in dmesg, your linux-firmware is outdated. You may either wait for your distribution to update the package or download the firmware from the [Cirrus repository][7] to /lib/firmware/cirrus manually. You will need following files:
     * cs35l41-dsp1-spk-cali-103c8c15-spkid0-l0.bin
@@ -46,6 +46,49 @@ How to fix the sound?
 3. If you have mic mute LED constantly on, your linux-firmware is outdated. You may manually update `/lib/firmware/intel/sof-ace-tplg/sof-hda-generic-2ch.tplg` from the latest [sof-bin release][8].
 4. Sometimes function buttons like micmute doesn't work on the first boot of the kernel, rebooting usually fixes this issue.
 
+How to fix the camera?
+--------
+This section is Proof-of-Concept for the time being, result might work for some use cases but it's not a 100% usable camera.
+1. Download following kernel patches:
+    * `wget -O int3472.patch https://lore.kernel.org/linux-media/20231007021225.9240-1-hao.yao@intel.com/raw`
+    * `wget -O ipu6-01.patch https://lore.kernel.org/linux-media/20240111065531.2418836-2-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-02.patch https://lore.kernel.org/linux-media/20240111065531.2418836-3-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-03.patch https://lore.kernel.org/linux-media/20240111065531.2418836-4-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-04.patch https://lore.kernel.org/linux-media/20240111065531.2418836-5-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-05.patch https://lore.kernel.org/linux-media/20240111065531.2418836-6-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-06.patch https://lore.kernel.org/linux-media/20240111065531.2418836-7-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-07.patch https://lore.kernel.org/linux-media/20240111065531.2418836-8-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-08.patch https://lore.kernel.org/linux-media/20240111065531.2418836-9-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-09.patch https://lore.kernel.org/linux-media/20240111065531.2418836-10-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-10.patch https://lore.kernel.org/linux-media/20240111065531.2418836-11-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-11.patch https://lore.kernel.org/linux-media/20240111065531.2418836-12-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-12.patch https://lore.kernel.org/linux-media/20240111065531.2418836-13-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-13.patch https://lore.kernel.org/linux-media/20240111065531.2418836-14-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-14.patch https://lore.kernel.org/linux-media/20240111065531.2418836-15-bingbu.cao@intel.com/raw`
+    * `wget -O ipu6-15.patch https://lore.kernel.org/linux-media/20240111065531.2418836-16-bingbu.cao@intel.com/raw`
+    * (ipu6-16.patch is missing intentionally)
+    * `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu6-fw.patch`
+    * (for 6.8) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu-bridge.patch`
+    * (for 6.8) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ov08x40.patch`
+    * (for 6.9) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu-bridge-69.patch`
+    * (for 6.9) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ov08x40-69.patch`
+2. Apply patches in the order of download.
+3. Ensure you have `CONFIG_VIDEO_OV08X40=m`, `CONFIG_INTEL_SKL_INT3472=m` and `CONFIG_VIDEO_INTEL_IPU6=m` in your kernel config file.
+4. Build & install the kernel.
+5. Ensure you have `/lib/firmware/intel/ipu/ipu6epmtl_fw.bin` file, update your `linux-firmware` package if not.
+6. Reboot and check `dmesg` if `ipu6` has successfully initialized and found the `ov08x40` sensor.
+7. Build and install libcamera
+    * `git clone https://gitlab.freedesktop.org/camera/libcamera-softisp.git`
+    * `cd libcamera-softisp`
+    * `git checkout SoftwareISP-v09`
+    * `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/libcamera.patch`
+    * `patch -p1 < ./libcamera.patch`
+    * `meson setup -Dpipelines=simple -Dipas=simple --prefix=/usr build`
+    * `ninja -C build install`
+8. Now you should be able to view the camera by launching `sudo qcam -s "width=1928,height=1208"`
+9. To allow other apps to use camera you have to make pipewire to use the new libcamera, this step depends on your distribution. You can test using [webrtc test page][11] in Firefox.
+
+
 [1]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/hp-spectre-x360-14-eu0xxx-f5a.dsl
 [2]: https://github.com/thor2002ro/asus_zenbook_ux3402za/tree/main/Sound
 [3]: https://docs.kernel.org/admin-guide/acpi/ssdt-overlays.html
@@ -56,3 +99,4 @@ How to fix the sound?
 [8]: https://github.com/thesofproject/sof-bin/releases
 [9]: https://gist.github.com/lamperez/d5b385bc0c0c04928211e297a69f32d7
 [10]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/kernel-realtek-69.patch
+[11]: https://mozilla.github.io/webrtc-landing/gum_test.html
