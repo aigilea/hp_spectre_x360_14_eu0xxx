@@ -1,0 +1,375 @@
+--- a/drivers/media/i2c/ov08x40.c	2024-03-25 00:10:05.000000000 +0300
++++ b/drivers/media/i2c/ov08x40.c	2024-03-25 10:52:32.037916401 +0300
+@@ -10,6 +10,11 @@
+ #include <media/v4l2-ctrls.h>
+ #include <media/v4l2-device.h>
+ #include <media/v4l2-fwnode.h>
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++#include <linux/clk.h>
++#include <linux/delay.h>
++#include <linux/gpio/consumer.h>
++#endif
+ 
+ #define OV08X40_REG_VALUE_08BIT		1
+ #define OV08X40_REG_VALUE_16BIT		2
+@@ -33,6 +38,12 @@
+ #define OV08X40_REG_CHIP_ID		0x300a
+ #define OV08X40_CHIP_ID			0x560858
+ 
++/* pixel array */
++#define OV08X40_PIXEL_ARRAY_WIDTH	3872
++#define OV08X40_PIXEL_ARRAY_HEIGHT	2432
++#define OV08X40_ACTIVE_WIDTH		3840
++#define OV08X40_ACTIVE_HEIGHT		2400
++
+ /* V_TIMING internal */
+ #define OV08X40_REG_VTS			0x380e
+ #define OV08X40_VTS_30FPS		0x09c4	/* the VTS need to be half in normal mode */
+@@ -1283,6 +1294,14 @@ struct ov08x40 {
+ 	struct v4l2_subdev sd;
+ 	struct media_pad pad;
+ 
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++	/* int3472 resources */
++	struct clk *img_clk;
++	struct regulator *avdd;
++	struct gpio_desc *reset;
++	struct gpio_desc *handshake;
++#endif
++
+ 	struct v4l2_ctrl_handler ctrl_handler;
+ 	/* V4L2 Controls */
+ 	struct v4l2_ctrl *link_freq;
+@@ -1299,6 +1318,9 @@ struct ov08x40 {
+ 
+ 	/* True if the device has been identified */
+ 	bool identified;
++
++	/* Sensor is streaming */
++	bool streaming;
+ };
+ 
+ #define to_ov08x40(_sd)	container_of(_sd, struct ov08x40, sd)
+@@ -1676,6 +1698,35 @@ static int ov08x40_enum_frame_size(struc
+ 	return 0;
+ }
+ 
++static int ov08x40_get_selection(struct v4l2_subdev *sd,
++				 struct v4l2_subdev_state *state,
++				 struct v4l2_subdev_selection *sel)
++{
++	if (sel->which != V4L2_SUBDEV_FORMAT_ACTIVE)
++		return -EINVAL;
++
++	switch (sel->target) {
++	case V4L2_SEL_TGT_NATIVE_SIZE:
++	case V4L2_SEL_TGT_CROP_BOUNDS:
++		sel->r.top = 0;
++		sel->r.left = 0;
++		sel->r.width = OV08X40_PIXEL_ARRAY_WIDTH;
++		sel->r.height = OV08X40_PIXEL_ARRAY_HEIGHT;
++		return 0;
++	case V4L2_SEL_TGT_CROP:
++	case V4L2_SEL_TGT_CROP_DEFAULT:
++		sel->r.top = (OV08X40_PIXEL_ARRAY_HEIGHT -
++			      OV08X40_ACTIVE_HEIGHT) / 2;
++		sel->r.left = (OV08X40_PIXEL_ARRAY_WIDTH -
++			       OV08X40_ACTIVE_WIDTH) / 2;
++		sel->r.width = OV08X40_ACTIVE_WIDTH;
++		sel->r.height = OV08X40_ACTIVE_HEIGHT;
++		return 0;
++	}
++
++	return -EINVAL;
++}
++
+ static void ov08x40_update_pad_format(const struct ov08x40_mode *mode,
+ 				      struct v4l2_subdev_format *fmt)
+ {
+@@ -1852,32 +1903,34 @@ static int ov08x40_set_stream(struct v4l
+ 	struct i2c_client *client = v4l2_get_subdevdata(sd);
+ 	int ret = 0;
+ 
++	if (ov08x->streaming == enable)
++		return 0;
++
+ 	mutex_lock(&ov08x->mutex);
+ 
+ 	if (enable) {
+ 		ret = pm_runtime_resume_and_get(&client->dev);
+-		if (ret < 0)
+-			goto err_unlock;
++		if (ret < 0) {
++			mutex_unlock(&ov08x->mutex);
++			return ret;
++		}
+ 
+ 		/*
+ 		 * Apply default & customized values
+ 		 * and then start streaming.
+ 		 */
+ 		ret = ov08x40_start_streaming(ov08x);
+-		if (ret)
+-			goto err_rpm_put;
++		if (ret) {
++			enable = 0;
++			ov08x40_stop_streaming(ov08x);
++			pm_runtime_put(&client->dev);
++		}
+ 	} else {
+ 		ov08x40_stop_streaming(ov08x);
+ 		pm_runtime_put(&client->dev);
+ 	}
+ 
+-	mutex_unlock(&ov08x->mutex);
+-
+-	return ret;
+-
+-err_rpm_put:
+-	pm_runtime_put(&client->dev);
+-err_unlock:
++	ov08x->streaming = enable;
+ 	mutex_unlock(&ov08x->mutex);
+ 
+ 	return ret;
+@@ -1909,6 +1962,92 @@ static int ov08x40_identify_module(struc
+ 	return 0;
+ }
+ 
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++static int ov08x40_power_off(struct device *dev)
++{
++	struct v4l2_subdev *sd = dev_get_drvdata(dev);
++	struct ov08x40 *ov08x40 = to_ov08x40(sd);
++	int ret = 0;
++
++	gpiod_set_value_cansleep(ov08x40->reset, 1);
++	gpiod_set_value_cansleep(ov08x40->handshake, 0);
++
++	if (ov08x40->avdd)
++		ret = regulator_disable(ov08x40->avdd);
++
++	clk_disable_unprepare(ov08x40->img_clk);
++
++	return ret;
++}
++
++static int ov08x40_power_on(struct device *dev)
++{
++	struct v4l2_subdev *sd = dev_get_drvdata(dev);
++	struct ov08x40 *ov08x40 = to_ov08x40(sd);
++	int ret;
++
++	ret = clk_prepare_enable(ov08x40->img_clk);
++	if (ret < 0) {
++		dev_err(dev, "failed to enable imaging clock: %d", ret);
++		return ret;
++	}
++
++	if (ov08x40->avdd) {
++		ret = regulator_enable(ov08x40->avdd);
++		if (ret < 0) {
++			dev_err(dev, "failed to enable avdd: %d", ret);
++			clk_disable_unprepare(ov08x40->img_clk);
++			return ret;
++		}
++	}
++	gpiod_set_value_cansleep(ov08x40->handshake, 1);
++	gpiod_set_value_cansleep(ov08x40->reset, 0);
++
++	// "Handshake pin is used for Lattice MIPI aggregator to enable the camera sensor. After pulled up, recommend to wail ~250ms to get everything ready."
++	msleep(250);
++
++	return 0;
++}
++
++static int __maybe_unused ov08x40_suspend(struct device *dev)
++{
++	struct v4l2_subdev *sd = dev_get_drvdata(dev);
++	struct ov08x40 *ov08x40 = to_ov08x40(sd);
++
++	mutex_lock(&ov08x40->mutex);
++	if (ov08x40->streaming)
++		ov08x40_stop_streaming(ov08x40);
++
++	mutex_unlock(&ov08x40->mutex);
++
++	return 0;
++}
++
++static int __maybe_unused ov08x40_resume(struct device *dev)
++{
++	struct v4l2_subdev *sd = dev_get_drvdata(dev);
++	struct ov08x40 *ov08x40 = to_ov08x40(sd);
++	int ret;
++
++	mutex_lock(&ov08x40->mutex);
++	if (ov08x40->streaming) {
++		ret = ov08x40_start_streaming(ov08x40);
++		if (ret)
++			goto error;
++	}
++
++	mutex_unlock(&ov08x40->mutex);
++
++	return 0;
++
++error:
++	ov08x40_stop_streaming(ov08x40);
++	ov08x40->streaming = 0;
++	mutex_unlock(&ov08x40->mutex);
++	return ret;
++}
++#endif /* IS_ENABLED(CONFIG_INTEL_SKL_INT3472) */
++
+ static const struct v4l2_subdev_video_ops ov08x40_video_ops = {
+ 	.s_stream = ov08x40_set_stream,
+ };
+@@ -1918,6 +2057,7 @@ static const struct v4l2_subdev_pad_ops
+ 	.get_fmt = ov08x40_get_pad_format,
+ 	.set_fmt = ov08x40_set_pad_format,
+ 	.enum_frame_size = ov08x40_enum_frame_size,
++	.get_selection = ov08x40_get_selection,
+ };
+ 
+ static const struct v4l2_subdev_ops ov08x40_subdev_ops = {
+@@ -2049,6 +2189,42 @@ static void ov08x40_free_controls(struct
+ 	mutex_destroy(&ov08x->mutex);
+ }
+ 
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++static int ov08x40_get_pm_resources(struct device *dev)
++{
++	struct v4l2_subdev *sd = dev_get_drvdata(dev);
++	struct ov08x40 *ov08x40 = to_ov08x40(sd);
++	int ret;
++
++	ov08x40->reset = devm_gpiod_get_optional(dev, "reset", GPIOD_OUT_LOW);
++	if (IS_ERR(ov08x40->reset))
++		return dev_err_probe(dev, PTR_ERR(ov08x40->reset),
++				     "failed to get reset gpio\n");
++
++	ov08x40->handshake = devm_gpiod_get_optional(dev, "handshake",
++						   GPIOD_OUT_LOW);
++	if (IS_ERR(ov08x40->handshake))
++		return dev_err_probe(dev, PTR_ERR(ov08x40->handshake),
++				     "failed to get handshake gpio\n");
++
++	ov08x40->img_clk = devm_clk_get_optional(dev, NULL);
++	if (IS_ERR(ov08x40->img_clk))
++		return dev_err_probe(dev, PTR_ERR(ov08x40->img_clk),
++				     "failed to get imaging clock\n");
++
++	ov08x40->avdd = devm_regulator_get_optional(dev, "avdd");
++	if (IS_ERR(ov08x40->avdd)) {
++		ret = PTR_ERR(ov08x40->avdd);
++		ov08x40->avdd = NULL;
++		if (ret != -ENODEV)
++			return dev_err_probe(dev, ret,
++					     "failed to get avdd regulator\n");
++	}
++
++	return 0;
++}
++#endif
++
+ static int ov08x40_check_hwcfg(struct device *dev)
+ {
+ 	struct v4l2_fwnode_endpoint bus_cfg = {
+@@ -2060,8 +2236,9 @@ static int ov08x40_check_hwcfg(struct de
+ 	int ret;
+ 	u32 ext_clk;
+ 
+-	if (!fwnode)
+-		return -ENXIO;
++	ep = fwnode_graph_get_next_endpoint(fwnode, NULL);
++	if (!ep)
++		return -EPROBE_DEFER;
+ 
+ 	ret = fwnode_property_read_u32(dev_fwnode(dev), "clock-frequency",
+ 				       &ext_clk);
+@@ -2076,10 +2253,6 @@ static int ov08x40_check_hwcfg(struct de
+ 		return -EINVAL;
+ 	}
+ 
+-	ep = fwnode_graph_get_next_endpoint(fwnode, NULL);
+-	if (!ep)
+-		return -ENXIO;
+-
+ 	ret = v4l2_fwnode_endpoint_alloc_parse(ep, &bus_cfg);
+ 	fwnode_handle_put(ep);
+ 	if (ret)
+@@ -2139,13 +2312,27 @@ static int ov08x40_probe(struct i2c_clie
+ 	/* Initialize subdev */
+ 	v4l2_i2c_subdev_init(&ov08x->sd, client, &ov08x40_subdev_ops);
+ 
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++	ret = ov08x40_get_pm_resources(&client->dev);
++	if (ret)
++		return ret;
++#endif
++
+ 	full_power = acpi_dev_state_d0(&client->dev);
+ 	if (full_power) {
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++		ov08x40_power_on(&client->dev);
++		if (ret) {
++			dev_err(&client->dev, "failed to power on\n");
++			return ret;
++		}
++#endif
++
+ 		/* Check module identity */
+ 		ret = ov08x40_identify_module(ov08x);
+ 		if (ret) {
+ 			dev_err(&client->dev, "failed to find sensor: %d\n", ret);
+-			return ret;
++			goto error_power_off;
+ 		}
+ 	}
+ 
+@@ -2154,7 +2341,7 @@ static int ov08x40_probe(struct i2c_clie
+ 
+ 	ret = ov08x40_init_controls(ov08x);
+ 	if (ret)
+-		return ret;
++		goto error_power_off;
+ 
+ 	/* Initialize subdev */
+ 	ov08x->sd.internal_ops = &ov08x40_internal_ops;
+@@ -2187,6 +2374,11 @@ error_media_entity:
+ error_handler_free:
+ 	ov08x40_free_controls(ov08x);
+ 
++error_power_off:
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++	ov08x40_power_off(&client->dev);
++#endif
++
+ 	return ret;
+ }
+ 
+@@ -2203,6 +2395,13 @@ static void ov08x40_remove(struct i2c_cl
+ 	pm_runtime_set_suspended(&client->dev);
+ }
+ 
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++static const struct dev_pm_ops ov08x40_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(ov08x40_suspend, ov08x40_resume)
++	SET_RUNTIME_PM_OPS(ov08x40_power_off, ov08x40_power_on, NULL)
++};
++#endif
++
+ #ifdef CONFIG_ACPI
+ static const struct acpi_device_id ov08x40_acpi_ids[] = {
+ 	{"OVTI08F4"},
+@@ -2215,6 +2414,9 @@ MODULE_DEVICE_TABLE(acpi, ov08x40_acpi_i
+ static struct i2c_driver ov08x40_i2c_driver = {
+ 	.driver = {
+ 		.name = "ov08x40",
++#if IS_ENABLED(CONFIG_INTEL_SKL_INT3472)
++		.pm = &ov08x40_pm_ops,
++#endif
+ 		.acpi_match_table = ACPI_PTR(ov08x40_acpi_ids),
+ 	},
+ 	.probe = ov08x40_probe,

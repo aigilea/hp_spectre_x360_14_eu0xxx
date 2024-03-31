@@ -1,0 +1,11 @@
+--- a/drivers/media/pci/intel/ipu-bridge.c	2024-03-25 09:43:40.432170095 +0300
++++ b/drivers/media/pci/intel/ipu-bridge.c	2024-03-25 09:45:38.948184544 +0300
+@@ -63,6 +63,8 @@ static const struct ipu_sensor_config ip
+ 	IPU_SENSOR_CONFIG("INT0310", 0),
+ 	/* Omnivision ov01a10 */
+ 	IPU_SENSOR_CONFIG("OVTI01A0", 1, 400000000),
++	/* Omnivision ov08x40 */
++	IPU_SENSOR_CONFIG("OVTI08F4", 1, 400000000),
+ };
+ 
+ static const struct ipu_property_names prop_names = {
