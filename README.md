@@ -48,8 +48,8 @@ How to fix the sound?
 
 How to fix the camera?
 --------
-This section is Proof-of-Concept for the time being, result might work for some use cases but it's not a 100% usable camera.
-1. Download following kernel patches:
+This section is Proof-of-Concept for the time being, it might work for some use cases but it's doesn't result in a 100% functional camera. It's mostly here to show the camera will work at some point in future.
+1. Download kernel patches:
     * `wget -O int3472.patch https://lore.kernel.org/linux-media/20231007021225.9240-1-hao.yao@intel.com/raw`
     * `wget -O ipu6-01.patch https://lore.kernel.org/linux-media/20240111065531.2418836-2-bingbu.cao@intel.com/raw`
     * `wget -O ipu6-02.patch https://lore.kernel.org/linux-media/20240111065531.2418836-3-bingbu.cao@intel.com/raw`
@@ -67,6 +67,7 @@ This section is Proof-of-Concept for the time being, result might work for some 
     * `wget -O ipu6-14.patch https://lore.kernel.org/linux-media/20240111065531.2418836-15-bingbu.cao@intel.com/raw`
     * `wget -O ipu6-15.patch https://lore.kernel.org/linux-media/20240111065531.2418836-16-bingbu.cao@intel.com/raw`
     * (ipu6-16.patch is missing intentionally)
+    * `wget -O ipu6-17.patch https://lore.kernel.org/linux-media/20240111065531.2418836-18-bingbu.cao@intel.com/raw`
     * `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu6-fw.patch`
     * (for 6.8) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu-bridge.patch`
     * (for 6.8) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ov08x40.patch`
@@ -75,8 +76,8 @@ This section is Proof-of-Concept for the time being, result might work for some 
 2. Apply patches in the order of download.
 3. Ensure you have `CONFIG_VIDEO_OV08X40=m`, `CONFIG_INTEL_SKL_INT3472=m` and `CONFIG_VIDEO_INTEL_IPU6=m` in your kernel config file.
 4. Build & install the kernel.
-5. Ensure you have `/lib/firmware/intel/ipu/ipu6epmtl_fw.bin` file, update your `linux-firmware` package if not.
-6. Reboot and check `dmesg` if `ipu6` has successfully initialized and found the `ov08x40` sensor.
+5. Ensure `/lib/firmware/intel/ipu/ipu6epmtl_fw.bin` file exists, update your `linux-firmware` package if not.
+6. Reboot and check your `dmesg` if `ipu6` has successfully initialized and found the `ov08x40` sensor.
 7. Build and install libcamera
     * `git clone https://gitlab.freedesktop.org/camera/libcamera-softisp.git`
     * `cd libcamera-softisp`
