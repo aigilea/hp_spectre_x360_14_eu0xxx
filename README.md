@@ -4,6 +4,12 @@ The latest and greatest Spectre x360 iteration offers new Core Ultra 155H with n
 
 But can it run Linux?
 
+Hardware
+--------
+Laptop is assembled by Quanta Computer, platform code name is DA0X3DMBAG0. If you happen to have boardview and/or schematic for the motherboard please file an issue to contact me (please note that widely available DA0X3**A**MBAG0 schematics are for 2021 Spectre, not for this one).
+
+You can find some photos of the motherboard in the [board][12] subfolder.
+
 Should you buy it?
 --------
 Linux won't boot without ACPI overlay and Secure Boot thus won't be usable until HP fixes the ACPI (probably never).
@@ -101,3 +107,4 @@ This section is Proof-of-Concept for the time being, it might work for some use 
 [9]: https://gist.github.com/lamperez/d5b385bc0c0c04928211e297a69f32d7
 [10]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/kernel-realtek-69.patch
 [11]: https://mozilla.github.io/webrtc-landing/gum_test.html
+[12]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/tree/master/board
