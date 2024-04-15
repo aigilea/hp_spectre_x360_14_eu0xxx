@@ -6,7 +6,7 @@ But can it run Linux?
 
 Hardware
 --------
-Laptop is assembled by Quanta Computer, platform code name is DA0X3DMBAG0. If you happen to have boardview and/or schematic for the motherboard please file an issue to contact me (please note that widely available DA0X3**A**MBAG0 schematics are for 2021 Spectre, not for this one).
+Laptop is assembled by Quanta Computer, platform code name is DA0X3DMBAG0. If you happen to have boardview and/or schematic for the motherboard or know where to buy one please file an issue to contact me (please note that widely available DA0X3**A**MBAG0 schematics are for 2020 Spectre, not for this one).
 
 You can find some photos of the motherboard in the [board][12] subfolder.
 
@@ -16,12 +16,14 @@ Linux won't boot without ACPI overlay and Secure Boot thus won't be usable until
 
 Synaptics releases Linux-compatible firmware only if requested by the vendor so fingerprint reader won't work without HP say-so (none of previous generations got one working).
 
-Camera has two sensors connected to IPU6 via MIPI. Main sensor (ov08x40) has a linux driver but it's neither int3472-aware nor libcamera-compatible, IR sensor (og0va1b) doesn't have a driver at all. Neither of sensors is supported by Intel VPU6 stack (although it looks like support for ov08x40 may be coming), the same with libcamera (but this one can at least be patched) so it's unlikely either of this sensors will work without patching for at least another year.
+Camera has two sensors connected to IPU6 via MIPI. Main sensor (ov08x40) has a linux driver but it's neither int3472-aware nor libcamera-compatible, IR sensor (og0va1b) doesn't have a driver at all. Neither of sensors is supported by Intel IPU6 stack (although it looks like support for ov08x40 may be coming), the same with libcamera (but this one can at least be patched) so it's unlikely either of this sensors will work without patching for at least another year.
 
 Otherwise it's a solid laptop, but think twice.
 
 How to install?
 --------
+If you're using Fedora see [Issue #4][13].
+
 1. Trackpad and touchscreen won't work during the setup so find a way to plug in both USB stick and a mouse at the same time if you need a mouse for the installation.
 2. Disable Secure Boot in the BIOS.
 3. Boot with `modprobe.blacklist=intel_lpss_pci` (press `e` in the grub menu, add parameter to the end of `linux` line, press `ctrl+x` to boot).
@@ -106,6 +108,13 @@ This section is Proof-of-Concept for the time being, it might work for some use 
 8. Now you should be able to view the camera by launching `sudo qcam -s "width=1928,height=1208"`
 9. To allow other apps to use camera you have to make pipewire to use the new libcamera, this step depends on your distribution. You can test using [webrtc test page][11] in Firefox.
 
+Don't disable keyboard and trackpad when tilted
+--------
+See [Issue #5][14].
+
+Enable trackpad palm rejection
+--------
+See [Issue #6][15].
 
 [1]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/hp-spectre-x360-14-eu0xxx-f5a.dsl
 [2]: https://github.com/thor2002ro/asus_zenbook_ux3402za/tree/main/Sound
@@ -119,3 +128,6 @@ This section is Proof-of-Concept for the time being, it might work for some use 
 [10]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/kernel-realtek-69.patch
 [11]: https://mozilla.github.io/webrtc-landing/gum_test.html
 [12]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/tree/master/board
+[13]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/4
+[14]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/5
+[15]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/6
