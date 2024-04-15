@@ -22,7 +22,7 @@ Otherwise it's a solid laptop, but think twice.
 
 How to install?
 --------
-If you're using Fedora see #4.
+If you're using Fedora see [Issue #4][13].
 
 1. Trackpad and touchscreen won't work during the setup so find a way to plug in both USB stick and a mouse at the same time if you need a mouse for the installation.
 2. Disable Secure Boot in the BIOS.
@@ -99,11 +99,11 @@ This section is Proof-of-Concept for the time being, it might work for some use 
 
 Don't disable keyboard and trackpad when tilted
 --------
-See #5.
+See [Issue #5][14].
 
 Enable trackpad palm rejection
 --------
-See #6.
+See [Issue #6][15].
 
 [1]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/hp-spectre-x360-14-eu0xxx-f5a.dsl
 [2]: https://github.com/thor2002ro/asus_zenbook_ux3402za/tree/main/Sound
@@ -117,3 +117,6 @@ See #6.
 [10]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/kernel-realtek-69.patch
 [11]: https://mozilla.github.io/webrtc-landing/gum_test.html
 [12]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/tree/master/board
+[13]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/4
+[14]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/5
+[15]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/6
