@@ -33,6 +33,17 @@ How to install?
 9. With SSDT patch applied you no longer need `modprobe.blacklist` workaround so previously disabled devices like trackpad and touchscreen should work at this point.
 10. Update your kernel to at least 6.7.
 
+Add palm rejection
+--------
+The spectre has a very nice touchpad, but Linux doesn't set the correct quirks to enable the hardware palm rejection. You can install the [palm-rejection](palm-rejection.service) systemd service to automatically set the quirks until the hid-multitouch kernel module is updated.
+
+```sh
+sudo cp palm-rejection.service /etc/systemd/system
+sudo systemctl enable palm-rejection.service
+sudo systemctl start palm-rejection.service
+```
+
+
 How to fix the sound?
 --------
 1. Kernel:
