@@ -35,17 +35,6 @@ If you're using Fedora see [Issue #4][13].
 9. With SSDT patch applied you no longer need `modprobe.blacklist` workaround so previously disabled devices like trackpad and touchscreen should work at this point.
 10. Update your kernel to at least 6.7.
 
-Add palm rejection
---------
-The spectre has a very nice touchpad, but Linux doesn't set the correct quirks to enable the hardware palm rejection. You can install the [palm-rejection](palm-rejection.service) systemd service to automatically set the quirks until the hid-multitouch kernel module is updated.
-
-```sh
-sudo cp palm-rejection.service /etc/systemd/system
-sudo systemctl enable palm-rejection.service
-sudo systemctl start palm-rejection.service
-```
-
-
 How to fix the sound?
 --------
 1. Kernel:
@@ -114,7 +103,13 @@ See [Issue #5][14].
 
 Enable trackpad palm rejection
 --------
-See [Issue #6][15].
+The spectre has a very nice touchpad, but Linux doesn't set the correct quirks to enable the hardware palm rejection. You can install the [palm-rejection](palm-rejection.service) systemd service to automatically set the quirks until the hid-multitouch kernel module is updated.
+
+```sh
+sudo cp palm-rejection.service /etc/systemd/system
+sudo systemctl enable palm-rejection.service
+sudo systemctl start palm-rejection.service
+```
 
 [1]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/hp-spectre-x360-14-eu0xxx-f5a.dsl
 [2]: https://github.com/thor2002ro/asus_zenbook_ux3402za/tree/main/Sound
