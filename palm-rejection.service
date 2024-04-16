@@ -1,0 +1,11 @@
+[Unit]
+Description=Enable Palm Rejection
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo 4160 | tee $(find /sys/devices/ | grep ELAN07C[DE].*quirks)'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target
+
