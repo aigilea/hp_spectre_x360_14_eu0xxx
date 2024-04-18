@@ -57,31 +57,14 @@ How to fix the sound?
 How to fix the camera?
 --------
 This section is Proof-of-Concept for the time being, it might work for some use cases but it's doesn't result in a 100% functional camera. It's mostly here to show the camera will work at some point in future.
-1. Download kernel patches:
-    * `wget -O int3472.patch https://lore.kernel.org/linux-media/20231007021225.9240-1-hao.yao@intel.com/raw`
-    * `wget -O ipu6-01.patch https://lore.kernel.org/linux-media/20240111065531.2418836-2-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-02.patch https://lore.kernel.org/linux-media/20240111065531.2418836-3-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-03.patch https://lore.kernel.org/linux-media/20240111065531.2418836-4-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-04.patch https://lore.kernel.org/linux-media/20240111065531.2418836-5-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-05.patch https://lore.kernel.org/linux-media/20240111065531.2418836-6-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-06.patch https://lore.kernel.org/linux-media/20240111065531.2418836-7-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-07.patch https://lore.kernel.org/linux-media/20240111065531.2418836-8-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-08.patch https://lore.kernel.org/linux-media/20240111065531.2418836-9-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-09.patch https://lore.kernel.org/linux-media/20240111065531.2418836-10-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-10.patch https://lore.kernel.org/linux-media/20240111065531.2418836-11-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-11.patch https://lore.kernel.org/linux-media/20240111065531.2418836-12-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-12.patch https://lore.kernel.org/linux-media/20240111065531.2418836-13-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-13.patch https://lore.kernel.org/linux-media/20240111065531.2418836-14-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-14.patch https://lore.kernel.org/linux-media/20240111065531.2418836-15-bingbu.cao@intel.com/raw`
-    * `wget -O ipu6-15.patch https://lore.kernel.org/linux-media/20240111065531.2418836-16-bingbu.cao@intel.com/raw`
-    * (ipu6-16.patch is missing intentionally)
-    * `wget -O ipu6-17.patch https://lore.kernel.org/linux-media/20240111065531.2418836-18-bingbu.cao@intel.com/raw`
-    * `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu6-fw.patch`
-    * (for 6.8) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu-bridge.patch`
-    * (for 6.8) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ov08x40.patch`
-    * (for 6.9) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu-bridge-69.patch`
-    * (for 6.9) `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ov08x40-69.patch`
-2. Apply patches in the order of download.
+1. Download patches
+```
+for i in {1..19}; do; wget -O "ipu6-$i.patch" "https://lore.kernel.org/linux-media/20240416201105.781496-$((i+1))-sakari.ailus@linux.intel.com/raw"; done
+wget -O int3472.patch https://lore.kernel.org/linux-media/20231007021225.9240-1-hao.yao@intel.com/raw
+wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ipu-bridge-69.patch
+wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ov08x40-69.patch
+```
+2. Apply patches in the order of download to the kernel 6.9 source tree, skip `ipu6-17.patch`.
 3. Ensure you have `CONFIG_VIDEO_OV08X40=m`, `CONFIG_INTEL_SKL_INT3472=m` and `CONFIG_VIDEO_INTEL_IPU6=m` in your kernel config file.
 4. Build & install the kernel.
 5. Ensure `/lib/firmware/intel/ipu/ipu6epmtl_fw.bin` file exists, update your `linux-firmware` package if not.
@@ -89,12 +72,12 @@ This section is Proof-of-Concept for the time being, it might work for some use 
 7. Build and install libcamera
     * `git clone https://gitlab.freedesktop.org/camera/libcamera-softisp.git`
     * `cd libcamera-softisp`
-    * `git checkout SoftwareISP-v09`
+    * `git checkout SoftwareISP-v10`
     * `wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/libcamera.patch`
     * `patch -p1 < ./libcamera.patch`
     * `meson setup -Dpipelines=simple -Dipas=simple --prefix=/usr build`
     * `ninja -C build install`
-8. Now you should be able to view the camera by launching `sudo qcam -s "width=1928,height=1208"`
+8. Now you should be able to view the camera by launching `sudo qcam -s "width=1928,height=1208"`. You may safely ignore missing `ov08x40.yaml` file error.
 9. To allow other apps to use camera you have to make pipewire to use the new libcamera, this step depends on your distribution. You can test using [webrtc test page][11] in Firefox.
 
 Don't disable keyboard and trackpad when tilted
