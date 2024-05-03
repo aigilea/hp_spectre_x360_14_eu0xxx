@@ -1,8 +1,9 @@
 DefinitionBlock ("", "SSDT", 5, "aigi  ", "x360-eu0", 0x02000000)
 {
-    External(PNVA, OpRegionObj)
+    External (PNVA, OpRegionObj)
     External (_SB_.PC00.I2C3, DeviceObj)
     External (_SB_.PC00.RP10.PXSX, DeviceObj)
+    External (_SB_.PC00.RP10.PXP_, PowerResObj)
 
     //
     // Problem: Kernel Panic during boot.
@@ -31,4 +32,10 @@ DefinitionBlock ("", "SSDT", 5, "aigi  ", "x360-eu0", 0x02000000)
     // For now 'good enough' solution is to just disable D3cold and go with D3hot.
     //
     Name (_SB.PC00.RP10.PXSX._S0W, 3)
+
+    //
+    // The above override may fail when this SSDT is loaded from initrd.
+    // Here's plan B for this case: prevent D3cold code from executing.
+    //
+    Name (_SB.PC00.RP10.PXP.GPRS, 0)
 }

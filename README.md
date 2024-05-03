@@ -30,7 +30,7 @@ If you're using Fedora see [Issue #4][13].
 4. Run the installation as usual.
 5. Add the same kernel parameter when rebooting to the installed system.
 6. Install IASL (usually package is named acpi-tools or acpica-tools or acpica).
-7. Download [SSDT patch][1] and compile it with `iasl -tc hp-spectre-x360-14-eu0xxx-f5a.dsl`.
+7. Download [SSDT patch][1] and compile it with `iasl -tc hp-spectre-x360-14-eu0xxx-f5a.asl`.
 8. There's a number of ways to apply the resulting AML file. The easiest one is to put it to the `/boot` and add `acpi /boot/filename.aml` line to the grub config, you can do it manually via `e` for the first time and then switch to using some [helper scripts][2]. There're kernel [means][3], [manuals][9] and [helper scripts][4] of loading additional ACPI tables as well.
 9. With SSDT patch applied you no longer need `modprobe.blacklist` workaround so previously disabled devices like trackpad and touchscreen should work at this point.
 10. Update your kernel to at least 6.7.
@@ -94,7 +94,7 @@ sudo systemctl enable palm-rejection.service
 sudo systemctl start palm-rejection.service
 ```
 
-[1]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/hp-spectre-x360-14-eu0xxx-f5a.dsl
+[1]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/hp-spectre-x360-14-eu0xxx-f5a.asl
 [2]: https://github.com/thor2002ro/asus_zenbook_ux3402za/tree/main/Sound
 [3]: https://docs.kernel.org/admin-guide/acpi/ssdt-overlays.html
 [4]: https://github.com/thesofproject/acpi-scripts
