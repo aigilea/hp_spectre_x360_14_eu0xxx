@@ -52,7 +52,7 @@ How to fix the sound?
     * cs35l41-dsp1-spk-prot-103c8c15-spkid1-r0.bin
     * cs35l41-dsp1-spk-prot-103c8c15.wmfw symlink to cs35l41/v6.78.0/halo_cspl_RAM_revB2_29.80.0.wmfw
 3. If you have mic mute LED constantly on, your linux-firmware is outdated. You may manually update `/lib/firmware/intel/sof-ace-tplg/sof-hda-generic-2ch.tplg` from the latest [sof-bin release][8].
-4. Sometimes function buttons like micmute doesn't work on the first boot of the kernel, rebooting usually fixes this issue.
+4. If micmute button doesn't work on the first boot of the kernel, it can sometimes be fixed by just rebooting once more (e.g. Manjaro). If it doesn't help (e.g. Ubuntu), try to run `echo -e "evdev:input:b0011v0001p0001eAB83*\n KEYBOARD_KEY_82=f20" | sudo tee /etc/udev/hwdb.d/90-internal-keyboard.hwdb > /dev/null && sudo systemd-hwdb update` and reboot.
 
 How to fix the camera?
 --------
