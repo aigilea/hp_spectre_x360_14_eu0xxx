@@ -12,7 +12,7 @@ You can find some photos of the motherboard in the [board][12] subfolder.
 
 Should you buy it?
 --------
-Linux won't boot without ACPI overlay and Secure Boot thus won't be usable until HP fixes the ACPI (probably never).
+~~Linux won't boot without ACPI overlay and Secure Boot thus won't be usable until HP fixes the ACPI (probably never).~~
 
 Synaptics releases Linux-compatible firmware only if requested by the vendor so fingerprint reader won't work without HP say-so (none of previous generations got one working).
 
@@ -20,7 +20,17 @@ Camera has two sensors connected to IPU6 via MIPI. Main sensor (ov08x40) has a l
 
 Otherwise it's a solid laptop, but think twice.
 
-How to install?
+How to install with BIOS version F.10 or later?
+--------
+HP have fixed the error in ACPI that caused panics so the installation is straightforward now. WiFi wakeup wasn't fixed however so SSDT patch or other workaround is still needed.
+
+1. Run the installation as usual.
+2. Install IASL (usually package is named acpi-tools or acpica-tools or acpica).
+3. Download [SSDT patch][1] and compile it with `iasl -tc hp-spectre-x360-14-eu0xxx-f5a.asl`. There's a [separate patch version] for a 16-inch model.
+4. There's a number of ways to apply the resulting AML file. The easiest one is to put it to the `/boot` and add `acpi /boot/filename.aml` line to the grub config, you can do it manually via `e` for the first time and then switch to using some [helper scripts][2]. There're kernel [means][3], [manuals][9] and [helper scripts][4] of loading additional ACPI tables as well.
+5. Update your kernel to at least 6.7.
+
+How to install with older BIOS versions?
 --------
 If you're using Fedora see [Issue #4][13].
 
@@ -38,7 +48,7 @@ If you're using Fedora see [Issue #4][13].
 How to fix the sound?
 --------
 1. Kernel:
-    * These fixes have been submitted and accepted so you don't have to patch if you're using kernel 6.9 or later (-rc3 looks usable, older ones have known problems).
+    * These fixes have been submitted and accepted so you don't have to patch if you're using kernel 6.9 or later.
     * If you want to use 6.8 or older, you have to apply [these][5] [two][6] patches (`patch -p1 < filename.patch` in the kernel source directory) and rebuild the kernel, consult your distribution documentation on how to do it.
 2. If you have `Falling back to default firmware.` messages from `cs35l41-hda` in dmesg, your linux-firmware is outdated. You may either wait for your distribution to update the package or download the firmware from the [Cirrus repository][7] to /lib/firmware/cirrus manually. You will need following files:
     * cs35l41-dsp1-spk-cali-103c8c15-spkid0-l0.bin
@@ -109,3 +119,4 @@ sudo systemctl start palm-rejection.service
 [13]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/4
 [14]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/5
 [15]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/6
+[16]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/hp-spectre-x360-16-aa0xxx-f10.asl
