@@ -26,7 +26,7 @@ HP have fixed the error in ACPI that caused panics so the installation is straig
 
 1. Run the installation as usual.
 2. Install IASL (usually package is named acpi-tools or acpica-tools or acpica).
-3. Download [SSDT patch][1] and compile it with `iasl -tc hp-spectre-x360-14-eu0xxx-f5a.asl`. There's a [separate patch version] for a 16-inch model.
+3. Download [SSDT patch][1] and compile it with `iasl -tc hp-spectre-x360-14-eu0xxx-f5a.asl`. There's a [separate patch version][16] for a 16-inch model.
 4. There's a number of ways to apply the resulting AML file. The easiest one is to put it to the `/boot` and add `acpi /boot/filename.aml` line to the grub config, you can do it manually via `e` for the first time and then switch to using some [helper scripts][2]. There're kernel [means][3], [manuals][9] and [helper scripts][4] of loading additional ACPI tables as well.
 5. Update your kernel to at least 6.7.
 
