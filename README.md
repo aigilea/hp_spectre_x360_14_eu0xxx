@@ -14,7 +14,7 @@ Should you buy it?
 --------
 ~~Linux won't boot without ACPI overlay and Secure Boot thus won't be usable until HP fixes the ACPI (probably never).~~
 
-Synaptics releases Linux-compatible firmware only if requested by the vendor so fingerprint reader won't work without HP say-so (none of previous generations got one working).
+~~Synaptics releases Linux-compatible firmware only if requested by the vendor so fingerprint reader won't work without HP say-so (none of previous generations got one working).~~ (Implemented in libfprint 1.94.9)
 
 Camera has two sensors connected to IPU6 via MIPI. Main sensor (ov08x40) has a linux driver but it's neither int3472-aware nor libcamera-compatible, IR sensor (og0va1b) doesn't have a driver at all. Neither of sensors is supported by Intel IPU6 stack (although it looks like support for ov08x40 may be coming), the same with libcamera (but this one can at least be patched) so it's unlikely either of this sensors will work without patching for at least another year.
 
