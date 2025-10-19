@@ -47,6 +47,7 @@ If you're using Fedora see [Issue #4][13].
 
 How to fix the sound?
 --------
+### Getting started
 1. Kernel:
     * These fixes have been submitted and accepted so you don't have to patch if you're using kernel 6.9 or later.
     * If you want to use 6.8 or older, you have to apply [these][5] [two][6] patches (`patch -p1 < filename.patch` in the kernel source directory) and rebuild the kernel, consult your distribution documentation on how to do it.
@@ -63,6 +64,16 @@ How to fix the sound?
     * cs35l41-dsp1-spk-prot-103c8c15.wmfw symlink to cs35l41/v6.78.0/halo_cspl_RAM_revB2_29.80.0.wmfw
 3. If you have mic mute LED constantly on, your linux-firmware is outdated. You may manually update `/lib/firmware/intel/sof-ace-tplg/sof-hda-generic-2ch.tplg` from the latest [sof-bin release][8].
 4. If micmute button doesn't work on the first boot of the kernel, it can sometimes be fixed by just rebooting once more (e.g. Manjaro). If it doesn't help (e.g. Ubuntu), try to run `echo -e "evdev:input:b0011v0001p0001eAB83*\n KEYBOARD_KEY_82=f20" | sudo tee /etc/udev/hwdb.d/90-internal-keyboard.hwdb > /dev/null && sudo systemd-hwdb update` and reboot.
+
+### Enhancing the sound
+This is to get that "Polystudio" treatment (or something similar) on Linux so that the the speakers, albeit working, don't sound awful.
+
+1. Download the [polystudio.json](https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/blob/main/polystudio.json) preset. 
+2. Download & launch [Easy Effects](https://flathub.org/en/apps/com.github.wwmm.easyeffects). It has [distro-specific binaries](https://github.com/wwmm/easyeffects/wiki/Package-Repositories) as well. 
+3. Click the Presets button on the left hand corner
+4. Click on the folder icon (import a preset from the local storage) and select the polystudio.json file
+5. For the preset to persist: click on the "Pipewire" tab > Presets Autoloading > Select the device as "Meteor Lake-P HD Audio Controller Speaker" and the Preset as "polystudio" and the + button to create the autoload
+5. For Easy Effects to startup on launch: Click on the hamburger menu on the top right corner > Preferences > Toggle on "Launch Service at System Startup"
 
 How to fix the camera?
 --------
