@@ -101,6 +101,36 @@ wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/ov
 8. Now you should be able to view the camera by launching `sudo qcam -s "width=1928,height=1208"`. You may safely ignore missing `ov08x40.yaml` file error.
 9. To allow other apps to use camera you have to make pipewire to use the new libcamera, this step depends on your distribution. You can test using [webrtc test page][11] in Firefox.
 
+WiFi wake-up workaround for immutable distros
+--------
+
+On immutable distributions (such as Aeon Desktop, Fedora Silverblue, openSUSE MicroOS, etc.), the filesystem is read-only and you cannot place files in `/boot` or modify system files directly. This makes the standard SSDT patch approach difficult to apply. Instead, you can use a PCI device reset workaround that removes the WiFi network controller from the kernel before sleep and rescans the PCI bus after wake-up.
+
+This workaround will also work for any distribution that uses `systemd`, providing an easier way to fix it without having to apply any patch.
+
+### Automated setup (recommended)
+
+1. Download the [setup script][17] and run it with sudo:
+
+```sh
+wget https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/setup-wifi-wakeup.sh
+chmod +x setup-wifi-wakeup.sh
+sudo ./setup-wifi-wakeup.sh
+```
+
+The script will:
+
+- Automatically detect your WiFi PCI device (if multiple network adapters are found, you'll be prompted to choose)
+- Create `/usr/local/bin/wifi-pci-reset.sh` with the correct PCI device ID
+- Create `/etc/systemd/system/pci-reset.service` systemd service
+- Enable the service to run automatically on suspend/resume
+
+For more details, see [Issue #31][18].
+
+### Manual setup
+
+If you prefer to set it up manually, you can read the [setup script][17] to see what it does and replicate the steps.
+
 Don't disable keyboard and trackpad when tilted
 --------
 See [Issue #5][14].
@@ -131,3 +161,5 @@ sudo systemctl start palm-rejection.service
 [14]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/5
 [15]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/6
 [16]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/hp-spectre-x360-16-aa0xxx-f10.asl
+[17]: https://raw.githubusercontent.com/aigilea/hp_spectre_x360_14_eu0xxx/main/setup-wifi-wakeup.sh
+[18]: https://github.com/aigilea/hp_spectre_x360_14_eu0xxx/issues/31
